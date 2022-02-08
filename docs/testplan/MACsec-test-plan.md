@@ -98,9 +98,9 @@ All combination of values will be picked as a separated test group.
 This is a common set of steps for each of the testcase
 
 1. Enable MACsec feature `sudo config feature state macsec enabled` on each device
-2. Dispatches MACsec configuration to devices
+2. Dispatches MACsec configuration to devices, as per testcase
 3. Waiting 300 seconds for the MACsec session to negotiate.
-4. Run each of the below testcase
+4. Verify the functionality as per testcase
 5. Remove all MACsec configuration on devices
 
 ## Test cases
@@ -109,6 +109,8 @@ This is a common set of steps for each of the testcase
 This testcase covers the macsec/MKA protocol functionality
 
 #### Check Control plane
+
+- Enable macsec on the interface on the DUT and remote VM.
 
 - Check the process, `wpa_supplicant`, for the target port is running in the devices.
 
@@ -290,7 +292,7 @@ SAI_MACSEC_SA_ATTR_CONFIGURED_EGRESS_XPN            │
     4. Check whether the SAK was changed. If no, sleep 6 seconds and check again until waiting more 10 times(60 seconds) and this test fail. If yes, this test pass.
     5. The background thread shouldn't obverse the remarkable packet loss (packet loss lesser than 1%).
 
-#### Primary/Fallback CAK
+#### MACsec Key rotation, Primary/Fallback CAK
 
 <TODO>
 
@@ -308,6 +310,7 @@ SAI_MACSEC_SA_ATTR_CONFIGURED_EGRESS_XPN            │
   This testcase covers the behavior of slow protocols when mac security is configured on interfaces 
 
 #### Verify Port Channel remains up with macsec configuration.
+  - Configure the interface 
 
 #### Verify LLDP neighbors are created with macsec configuration.
 
