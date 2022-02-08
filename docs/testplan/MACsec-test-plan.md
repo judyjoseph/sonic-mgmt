@@ -1,6 +1,7 @@
 <!-- omit in toc -->
 # MACsec Test plan
 
+
 * [MACsec Test plan](#macsec-test-plan)
    * [Testbed](#testbed)
    * [Common Configuration](#common-configuration)
@@ -22,14 +23,14 @@
             * [Bypass mode](#bypass-mode)
             * [Encrypt mode](#encrypt-mode)
             * [Strict mode](#strict-mode)
-         * [Verify SNMP request/response works across interface with macsec configuration.](#verify-snmp-request/response-works-across-interface-with-macsec-configuration)
-      * [Testcase : More usecases and fault handling scenario's](#testcase--more-usecases-and-fault-handling-scenarios)
+         * [Verify SNMP request/response works across interface with macsec configuration.](#verify-snmp-requestresponse-works-across-interface-with-macsec-configuration)
+      * [Testcase : Deployment usecases and fault handling scenario's](#testcase--deployment-usecases-and-fault-handling-scenarios)
          * [Link flap on an interface with macsec configured.](#link-flap-on-an-interface-with-macsec-configured)
          * [Link flap of a portchannel member interface with macsec configured.](#link-flap-of-a-portchannel-member-interface-with-macsec-configured)
          * [MACsec session cannot be established under wrong MKA configuration](#macsec-session-cannot-be-established-under-wrong-mka-configuration)
          * [Config reload done on DUT with macsec configuration](#config-reload-done-on-dut-with-macsec-configuration)
          * [COPP](#copp)
-         * [Everflow, port mirroring](#everflow-port-mirroring)
+         * [Everflow, port mirroring on macsec enabled interfaces.](#everflow-port-mirroring-on-macsec-enabled-interfaces)
       * [Testcase : Scale tests](#testcase--scale-tests)
          * [Enable macsec on all interfaces on the DUT](#enable-macsec-on-all-interfaces-on-the-dut)
          * [Rekeying in all macsec sessions happens at the same time](#rekeying-in-all-macsec-sessions-happens-at-the-same-time)
