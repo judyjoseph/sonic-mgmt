@@ -22,7 +22,7 @@
             * [Bypass mode](#bypass-mode)
             * [Encrypt mode](#encrypt-mode)
             * [Strict mode](#strict-mode)
-         * [Verify SNMP sessions are created across interface with macsec configuration.](#verify-snmp-sessions-are-created-across-interface-with-macsec-configuration)
+         * [Verify SNMP request/response works across interface with macsec configuration.](#verify-snmp-request/response-works-across-interface-with-macsec-configuration)
       * [Testcase : More usecases and fault handling scenario's](#testcase--more-usecases-and-fault-handling-scenarios)
          * [Link flap on an interface with macsec configured.](#link-flap-on-an-interface-with-macsec-configured)
          * [Link flap of a portchannel member interface with macsec configured.](#link-flap-of-a-portchannel-member-interface-with-macsec-configured)
@@ -362,7 +362,7 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
 4. Send encrypted PFC frame on the PTF injected port
    - The DUT expects to capture the clear PFC packet
 
-#### Verify SNMP sessions are created across interface with macsec configuration.
+#### Verify SNMP request/response works across interface with macsec configuration.
   Configure the macsec profile on interface and check if the snmp walk succeeds from the peer VM.
 
 ### Testcase : Deployment usecases and fault handling scenario's
@@ -379,6 +379,8 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
   
 #### MACsec session cannot be established under wrong MKA configuration
   If the CAK is mis-matched, the MACsec cannot be established.
+  Check the behaviour of interface state, If the interface status stays UP, 
+  how is control plane protocols notified eg: BGP, Or is it that the sessions will not come up ?
 
 #### Config reload done on DUT with macsec configuration
   The macsec sessions to come back up.
