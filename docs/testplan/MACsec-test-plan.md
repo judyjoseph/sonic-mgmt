@@ -297,8 +297,8 @@ SAI_MACSEC_SA_ATTR_CONFIGURED_EGRESS_XPN            │
    TODO
 
 #### Configure priority in macsec profile so that DUT/VM becomes key server
-   Check the behaviour when DUT is key server
-   Check the behaviour when the peer VM is the key server.
+   1. Check the behaviour when DUT is key server
+   2. Check the behaviour when the peer VM is the key server.
    TODO
   
 #### Configure the policy in macsec profile to be integrity_only/security  
@@ -308,18 +308,18 @@ SAI_MACSEC_SA_ATTR_CONFIGURED_EGRESS_XPN            │
   This testcase covers the behavior of slow protocols when mac security is configured on interfaces 
 
 #### Verify Port Channel remains up with macsec configuration.
-  Configure the macsec profile on interfaces and add them as members of a Portchannel
-  Check the behaviour when macsec is enabled on member interfaces of a portchannel is already UP.
+  1. Configure the macsec profile on interfaces and add them as members of a Portchannel
+  2. Check the behaviour when macsec is enabled on member interfaces of a portchannel is already UP.
  
 #### Verify LLDP neighbors are created with macsec configuration.
-  Configure the macsec profile on interface and check if the LLDP neighbors are created.
-  Check the LLDP meighbors is present after removal of macsec config.
-  Check the behaviour when macsec is enabled on an interface where LLDP neighborship was already present.
+  1. Configure the macsec profile on interface and check if the LLDP neighbors are created.
+  2. Check the LLDP meighbors is present after removal of macsec config.
+  3. Check the behaviour when macsec is enabled on an interface where LLDP neighborship was already present.
 
 #### Verify the BGP neighbourship is created with macsec configuration.
-  Configure the macsec profile on interface and check if the BGP sessions are etablished.
-  Check the BGP sessions are present after removal of macsec config.
-  Check the behaviour when macsec is enabled on an interface where BGP session was already up with peer.
+  1. Configure the macsec profile on interface and check if the BGP sessions are etablished.
+  2. Check the BGP sessions are present after removal of macsec config.
+  3. Check the behaviour when macsec is enabled on an interface where BGP session was already up with peer.
 
 #### Verify PFC in MACsec
 
@@ -379,13 +379,13 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
     (iii) Portchannel behaviour when there is a mismatch of config in member interfaces.
   
 #### MACsec session cannot be established under wrong MKA configuration
-  If the CAK is mis-matched, the MACsec cannot be established.
-  Check the behaviour of interface state, If the interface status stays UP, 
-  how is control plane protocols notified eg: BGP, Or is it that the sessions will not come up ?
+  1. If the CAK is mis-matched, the MACsec cannot be established.
+  2. Check the behaviour of interface state, If the interface status stays UP, 
+     how is control plane protocols notified eg: BGP, Or is it that the sessions will not come up ?
 
 #### Config reload done on DUT with macsec configuration
-  The macsec sessions to come back up.
-  The protocols on top like LACP, LLDP, BGP have all the sessions up.
+  1. The macsec sessions to come back up.
+  2. The protocols on top like LACP, LLDP, BGP have all the sessions up.
   
 #### COPP  
   TODO
@@ -396,8 +396,8 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
 ### Testcase : Scale tests
   
 #### Enable macsec on all interfaces on the DUT
-  Check the CPU, ASIC behavior when there are multiple wpa_supplicant processes being spawned.
-  What happens when we flap all ports together, time it takes for Portchannels/BGP sessions to be up
+  1. Check the CPU, ASIC behavior when there are multiple wpa_supplicant processes being spawned.
+  2. When all the interfaces flap together, how much time it takes for Portchannels/BGP sessions to be up
   
 #### Rekeying in all macsec sessions happens at the same time
   Check the sessions are all up.
