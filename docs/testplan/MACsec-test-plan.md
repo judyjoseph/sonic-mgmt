@@ -11,7 +11,7 @@
          * [Check Control plane](#check-control-plane)
          * [Check the Data plane](#check-the-data-plane)
          * [Rekey caused by Packet Number exhaustion](#rekey-caused-by-packet-number-exhaustion)
-         * [Primary/Fallback CAK](#primaryfallback-cak)
+         * [MACsec Key rotation Primary/Fallback CAK](#macsec-key-rotation-primaryfallback-cak)
          * [Configure priority in macsec profile so that DUT/VM becomes key server](#configure-priority-in-macsec-profile-so-that-dutvm-becomes-key-server)
          * [Configure the policy in macsec profile to be integrity_only/security](#configure-the-policy-in-macsec-profile-to-be-integrity_onlysecurity)
       * [Testcase : Macsec interop with other slow protocols](#testcase--macsec-interop-with-other-slow-protocols)
@@ -111,9 +111,7 @@ This testcase covers the macsec/MKA protocol functionality
 #### Check Control plane
 
 - Enable macsec on the interface on the DUT and remote VM.
-
 - Check the process, `wpa_supplicant`, for the target port is running in the devices.
-
 - Check APP DB, Check the following fields in MACsec port table are consistent with configuration
 
     | Config DB Field | Config DB Value |  App DB Field  | APP DB Value |
@@ -293,28 +291,32 @@ SAI_MACSEC_SA_ATTR_CONFIGURED_EGRESS_XPN            │
     5. The background thread shouldn't obverse the remarkable packet loss (packet loss lesser than 1%).
 
 #### MACsec Key rotation, Primary/Fallback CAK
-
-<TODO>
+   TODO
 
 #### Configure priority in macsec profile so that DUT/VM becomes key server
    Check the behaviour when DUT is key server
    Check the behaviour when the peer VM is the key server.
-
-<TODO>
+   TODO
   
 #### Configure the policy in macsec profile to be integrity_only/security  
-  
-<TODO>
+   TODO
   
 ### Testcase : Macsec interop with other slow protocols 
   This testcase covers the behavior of slow protocols when mac security is configured on interfaces 
 
 #### Verify Port Channel remains up with macsec configuration.
-  - Configure the interface 
-
+  Configure the macsec profile on interfaces and add them as members of a Portchannel
+  Check the behaviour when macsec is enabled on member interfaces of a portchannel is already UP.
+ 
 #### Verify LLDP neighbors are created with macsec configuration.
+  Configure the macsec profile on interface and check if the LLDP neighbors are created.
+  Check the LLDP meighbors is present after removal of macsec config.
+  Check the behaviour when macsec is enabled on an interface where LLDP neighborship was already present.
 
 #### Verify the BGP neighbourship is created with macsec configuration.
+  Configure the macsec profile on interface and check if the BGP sessions are etablished.
+  Check the BGP sessions are present after removal of macsec config.
+  Check the behaviour when macsec is enabled on an interface where BGP session was already up with peer.
 
 #### Verify PFC in MACsec
 
@@ -359,30 +361,33 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
    - The DUT expects to capture the clear PFC packet
 
 #### Verify SNMP sessions are created across interface with macsec configuration.
-
+  Configure the macsec profile on interface and check if the snmp walk succeeds from the peer VM.
 
 ### Testcase : More usecases and fault handling scenario's
-This testcase covers the various fault scenario's and the expected behavior.
+  This testcase covers the various fault scenario's and the expected behavior.
   
 #### Link flap on an interface with macsec configured.
-MKA session can be recovered from the link flap.
+  MKA session can be recovered from the link flap.
 
 #### Link flap of a portchannel member interface with macsec configured.
-  * Consider case when
+  Consider case when
     (i) this is the only member interface of portchannel
     (ii) the portchannel has more member ports, all macsec enabled - and one of the member port flaps.
     (iii) Portchannel behaviour when there is a mismatch of config in member interfaces.
   
 #### MACsec session cannot be established under wrong MKA configuration
-If the CAK is mis-matched, the MACsec cannot be established.
-
+  If the CAK is mis-matched, the MACsec cannot be established.
 
 #### Config reload done on DUT with macsec configuration
   The macsec sessions to come back up.
   The protocols on top like LACP, LLDP, BGP have all the sessions up.
   
 #### COPP  
-  
+  TODO
+
+#### Everflow, port mirroring
+  TODO
+
 ### Testcase : Scale tests
   
 #### Enable macsec on all interfaces on the DUT
@@ -394,4 +399,3 @@ If the CAK is mis-matched, the MACsec cannot be established.
   
 #### Macsec enabled on all interfaces and the DUT is rebooted.
   Check the macsec docker comes up and macsec sessions are established.
- 
