@@ -114,8 +114,7 @@ This is a common set of steps for each of the testcase
 ### Testcase : Macsec Functionality
 This testcase covers the macsec/MKA protocol functionality
 
-#### Test ##1 
-Check Control plane
+#### Test ##1 : Check Control plane
 
 - Check the process, `wpa_supplicant`, for the target port is running in the devices.
 
@@ -146,8 +145,7 @@ Check Control plane
 
   Note: This checking is only for SONiC virtual switch to verify the implementation of virtual SAI. If the DUT is SONiC virtual switch, do this checking on the DUT. And if the neighbor devices(VM0 and VM1) are SONiC virtual switch, do this on the neighbor devices too.
 
-#### Test ##2 
-Check the Data plane
+#### Test ##2 : Check the Data plane
 
 ```txt
 +-----------------------------------------------------------------------------------+
@@ -236,8 +234,7 @@ All VMs and PTF docker in the host need to install PTF NN agent. So, SONiC-mgmt-
     3. Send a set of above packet on the VM0
     4. VM1 should receive at least one expected above packet
 
-#### Test ##3 
-Rekey caused by Packet Number exhaustion
+#### Test ##3 : Rekey caused by Packet Number exhaustion
 
 The thresholds of rekey packet number are `0xC0000000ULL` to 32bits packet number and `0xC000000000000000ULL` to 64bits packet number(XPN). It's impossible to really send many packets to trigger the rekey action. So, We use the attribute `next_pn` of `MACSEC_EGRESS_SA` in APP_DB to cheat MKA protocol for rekey action.
 
@@ -299,35 +296,30 @@ SAI_MACSEC_SA_ATTR_CONFIGURED_EGRESS_XPN            │
     4. Check whether the SAK was changed. If no, sleep 6 seconds and check again until waiting more 10 times(60 seconds) and this test fail. If yes, this test pass.
     5. The background thread shouldn't obverse the remarkable packet loss (packet loss lesser than 1%).
 
-#### Test ##4
-Primary/Fallback CAK
+#### Test ##4: Primary/Fallback CAK
 
 <TODO>
 
-#### Test ##5
-Configure priority in macsec profile so that DUT/VM becomes key server
+#### Test ##5 : Configure priority in macsec profile so that DUT/VM becomes key server
+   Check the behaviour when DUT is key server
+   Check the behaviour when the peer VM is the key server.
 
 <TODO>
   
-#### Test ##6
-Configure the policy in macsec profile to be integrity_only/security  
+#### Test ##6 : Configure the policy in macsec profile to be integrity_only/security  
   
 <TODO>
   
 ### Testcase : Macsec interop with other slow protocols 
   This testcase covers the behavior of slow protocols when mac security is configured on interfaces 
 
-#### Test ##1
-Verify Port Channel remains up after macsec is configured on the interface.
+#### Test ##1 : Verify Port Channel remains up with macsec configuration.
 
-#### Test ##2
-Verify LLDP neighbors are created after macsec is configured on the interface.
+#### Test ##2 : Verify LLDP neighbors are created with macsec configuration.
 
-#### Test ##3
-Verify the BGP neoghborship is created after the macsec is configured on interface
+#### Test ##3 : Verify the BGP neighbourship is created with macsec configuration.
 
-#### Test ##4
-Verify PFC in MACsec
+#### Test ##4 : Verify PFC in MACsec
 
 ![MACsec_PFC_test](images/MACsec_PFC_test.png)  
 
@@ -369,27 +361,40 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
 4. Send encrypted PFC frame on the PTF injected port
    - The DUT expects to capture the clear PFC packet
 
-#### Test ##5
-Verify SNMP sessions are created across interface with mac-sec configuration.
+#### Test ##5 : Verify SNMP sessions are created across interface with macsec configuration.
 
 
-### Testcase : Advanced tests
-This testcase covers the  
+### Testcase : More usecases and fault handling scenario's
+This testcase covers the various fault scenario's and the expected behavior.
   
-#### Recovering from unexpected link down
-
+#### Test ##1 : Link flap on an interface with macsec configured.
 MKA session can be recovered from the link flap.
 
-#### MACsec session cannot be established under wrong MKA configuration
-
+#### Test ##2 : Link flap of a portchannel member interface with macsec configured.
+  * Consider case when
+    (i) this is the only member interface of portchannel
+    (ii) the portchannel has more member ports, all macsec enabled - and one of the member port flaps.
+    (iii) Portchannel behaviour when there is a mismatch of config in member interfaces.
+  
+#### Test ##3 : MACsec session cannot be established under wrong MKA configuration
 If the CAK is mis-matched, the MACsec cannot be established.
 
-### Others
 
-#### COPP
-
-#### MACsec on T2 topology
-
-##### One port-channel has four members enabled MACsec
-
-##### Scale tests
+#### Test ##4 : Config reload done on DUT with macsec configuration
+  The macsec sessions to come back up.
+  The protocols on top like LACP, LLDP, BGP have all the sessions up.
+  
+#### Test ##5 : COPP  
+  
+### Testcase : Scale tests
+  
+#### Test ##1 : Enable macsec on all interfaces on the DUT
+  Check the CPU, ASIC behavior when there are multiple wpa_supplicant processes being spawned.
+  What happens when we flap all ports together, time it takes for Portchannels/BGP sessions to be up
+  
+#### Test ##2 : Rekeying in all macsec sessions happens at the same time
+  Check the sessions are all up.
+  
+#### Test ##3 : Macsec enabled on all interfaces and the DUT is rebooted.
+  Check the macsec docker comes up and macsec sessions are established.
+ 
