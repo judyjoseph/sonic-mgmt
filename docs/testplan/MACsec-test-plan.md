@@ -228,6 +228,7 @@ All VMs and PTF docker in the host need to install PTF NN agent. So, SONiC-mgmt-
 
     3. Send a set of above packet on the VM0
     4. VM1 should receive at least one expected above packet
+    5. Check the interface stats with macsec counters.
 
 #### Rekey caused by Packet Number exhaustion
 
@@ -364,7 +365,7 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
 #### Verify SNMP sessions are created across interface with macsec configuration.
   Configure the macsec profile on interface and check if the snmp walk succeeds from the peer VM.
 
-### Testcase : More usecases and fault handling scenario's
+### Testcase : Deployment usecases and fault handling scenario's
   This testcase covers the various fault scenario's and the expected behavior.
   
 #### Link flap on an interface with macsec configured.
@@ -386,7 +387,7 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
 #### COPP  
   TODO
 
-#### Everflow, port mirroring
+#### Everflow, port mirroring on macsec enabled interfaces.
   TODO
 
 ### Testcase : Scale tests
