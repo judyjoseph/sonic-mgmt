@@ -13,8 +13,6 @@
          * [Check the Data plane](#check-the-data-plane)
          * [Rekey caused by Packet Number exhaustion](#rekey-caused-by-packet-number-exhaustion)
          * [MACsec Key rotation, Primary/Fallback CAK](#macsec-key-rotation-primaryfallback-cak)
-         * [Configure priority in macsec profile so that DUT/VM becomes key server](#configure-priority-in-macsec-profile-so-that-dutvm-becomes-key-server)
-         * [Configure the policy in macsec profile to be integrity_only/security](#configure-the-policy-in-macsec-profile-to-be-integrity_onlysecurity)
       * [Testcase : Macsec interop with other slow protocols](#testcase--macsec-interop-with-other-slow-protocols)
          * [Verify Port Channel remains up with macsec configuration.](#verify-port-channel-remains-up-with-macsec-configuration)
          * [Verify LLDP neighbors are created with macsec configuration.](#verify-lldp-neighbors-are-created-with-macsec-configuration)
@@ -296,14 +294,7 @@ SAI_MACSEC_SA_ATTR_CONFIGURED_EGRESS_XPN            │
 #### MACsec Key rotation, Primary/Fallback CAK
    TODO
 
-#### Configure priority in macsec profile so that DUT/VM becomes key server
-   1. Check the behaviour when DUT is key server
-   2. Check the behaviour when the peer VM is the key server.
-   TODO
-  
-#### Configure the policy in macsec profile to be integrity_only/security  
-   TODO
-  
+ 
 ### Testcase : Macsec interop with other slow protocols 
   This testcase covers the behavior of slow protocols when mac security is configured on interfaces 
 
@@ -370,18 +361,19 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
   This testcase covers the various fault scenario's and the expected behavior.
   
 #### Link flap on an interface with macsec configured.
-  MKA session can be recovered from the link flap.
+  - MKA session can be recovered from the link flap if the port remains up for less than 6 secs (MKA protocol timeout) 
+  - If the port is down for more than 6 sec, MKA session will create a new session.
 
-#### Link flap of a portchannel member interface with macsec configured.
+#### Link flap of a portchannel member which has macsec configured.
   Consider case when
-    (i) this is the only member interface of portchannel
-    (ii) the portchannel has more member ports, all macsec enabled - and one of the member port flaps.
-    (iii) Portchannel behaviour when there is a mismatch of config in member interfaces.
+    - this interface is the only member of portchannel
+    - the portchannel has more member ports, all macsec enabled - and one of the member port flaps.
+    - Portchannel behaviour when there is a mismatch of config in member interfaces.
   
 #### MACsec session cannot be established under wrong MKA configuration
   1. If the CAK is mis-matched, the MACsec cannot be established.
-  2. Check the behaviour of interface state, If the interface status stays UP, 
-     how is control plane protocols notified eg: BGP, Or is it that the sessions will not come up ?
+  2. In this scenario, check the behaviour of interface state, If the interface status stays UP, 
+     how is control plane protocols eg: BGP will behave ? The session will not be established.
 
 #### Config reload done on DUT with macsec configuration
   1. The macsec sessions to come back up.
@@ -395,7 +387,7 @@ Use PTF to generate and capture PFC packets and set the same mode between DUT an
 
 ### Testcase : Scale tests
   
-#### Enable macsec on all interfaces on the DUT
+#### Enable macsec on all interfaces on the DUT/linecard
   1. Check the CPU, ASIC behavior when there are multiple wpa_supplicant processes being spawned.
   2. When all the interfaces flap together, how much time it takes for Portchannels/BGP sessions to be up
   
