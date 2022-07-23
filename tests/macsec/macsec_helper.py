@@ -29,7 +29,8 @@ __all__ = [
     'get_mka_session',
     'get_macsec_sa_name',
     'get_macsec_counters',
-    'get_sci'
+    'get_sci',
+    'getns_prefix'
 ]
 
 

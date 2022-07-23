@@ -82,7 +82,11 @@ class TestControlPlane():
         _, _, _, last_dut_egress_sa_table, last_dut_ingress_sa_table = get_appl_db(
             duthost, port_name, nbr["host"], nbr["port"])
         up_link = upstream_links[port_name]
-        output = duthost.command("ping {} -w {} -q -i 0.1".format(up_link["local_ipv4_addr"], rekey_period * 2))["stdout_lines"]
+        asic = duthost.get_port_asic_instance(port_name)
+        ns = duthost.get_namespace_from_asic_id(asic.asic_index)
+        if duthost.is_multi_asic:
+            NS_PREFIX = "sudo ip netns exec {}".format(ns)
+        output = duthost.command("{} ping {} -w {} -q -i 0.1".format(NS_PREFIX, up_link["local_ipv4_addr"], rekey_period * 2))["stdout_lines"]
         _, _, _, new_dut_egress_sa_table, new_dut_ingress_sa_table = get_appl_db(
             duthost, port_name, nbr["host"], nbr["port"])
         assert last_dut_egress_sa_table != new_dut_egress_sa_table
@@ -93,7 +97,10 @@ class TestControlPlane():
 class TestDataPlane():
     BATCH_COUNT = 10
 
-    def test_server_to_neighbor(self, duthost, ctrl_links, downstream_links, upstream_links, ptfadapter):
+    def test_server_to_neighbor(self, duthost, ctrl_links, downstream_links, upstream_links, ptfadapter, tbinfo):
+        if tbinfo["topo"]["type"] == "t2":
+            pytest.skip("SKIP test_server_to_neighbor as there are no downstream neighbors.")
+
         ptfadapter.dataplane.set_qlen(TestDataPlane.BATCH_COUNT * 10)
 
         down_link = downstream_links.values()[0]
@@ -146,8 +153,12 @@ class TestDataPlane():
 
     def test_dut_to_neighbor(self, duthost, ctrl_links, upstream_links):
         for up_port, up_link in upstream_links.items():
+            asic = duthost.get_port_asic_instance(up_port)
+            ns = duthost.get_namespace_from_asic_id(asic.asic_index)
+            if duthost.is_multi_asic:
+                NS_PREFIX = "sudo ip netns exec {}".format(ns)
             ret = duthost.command(
-                "ping -c {} {}".format(4, up_link['local_ipv4_addr']))
+                "{} ping -c {} {}".format(NS_PREFIX, 4, up_link['local_ipv4_addr']))
             assert not ret['failed']
 
     def test_neighbor_to_neighbor(self, duthost, ctrl_links, upstream_links, nbr_device_numbers):
@@ -189,7 +200,10 @@ class TestDataPlane():
                 requester["host"].shell("ip route del 0.0.0.0/0 via {}".format(
                     requester["peer_ipv4_addr"]), module_ignore_errors=True)
 
-    def test_counters(self, duthost, ctrl_links, upstream_links, rekey_period):
+    def test_counters(self, duthost, ctrl_links, upstream_links, rekey_period, tbinfo):
+        if tbinfo["topo"]["type"] == "t2":
+            pytest.skip("SKIP test_counters for T2 topo")
+
         if rekey_period:
             pytest.skip("Counter increase is not guaranteed in case rekey is happening")
         EGRESS_SA_COUNTERS = (
@@ -229,8 +243,12 @@ class TestDataPlane():
             ingress_start_counters += Counter(get_macsec_counters(asic, ingress_sa_name))
 
         # Launch traffic
+        asic = duthost.get_port_asic_instance(port_name)
+        ns = duthost.get_namespace_from_asic_id(asic.asic_index)
+        if duthost.is_multi_asic:
+            NS_PREFIX = "sudo ip netns exec {}".format(ns)
         ret = duthost.command(
-            "ping -c {} -s {} {}".format(PKT_NUM, PKT_OCTET, nbr_ip_addr))
+            "{} ping -c {} -s {} {}".format(NS_PREFIX, PKT_NUM, PKT_OCTET, nbr_ip_addr))
         assert not ret['failed']
         sleep(10) # wait 10s for polling counters
 
@@ -377,22 +395,24 @@ class TestInteropProtocol():
     Macsec interop with other protocols
     '''
 
-    def test_port_channel(self, duthost, ctrl_links):
+    def test_port_channel(self, duthost, profile_name, ctrl_links):
         '''Verify lacp
         '''
         ctrl_port, _ = ctrl_links.items()[0]
         pc = find_portchannel_from_member(ctrl_port, get_portchannel(duthost))
         assert pc["status"] == "Up"
 
+        disable_macsec_port(duthost, ctrl_port)
+        sleep(30)
         # Remove ethernet interface <ctrl_port> from PortChannel interface <pc>
-        duthost.command("sudo config portchannel member del {} {}".format(
-            pc["name"], ctrl_port))
+        duthost.command("sudo config portchannel {} member del {} {}".format(getns_prefix(duthost, ctrl_port), pc["name"], ctrl_port))
         assert wait_until(20, 1, 0, lambda: get_portchannel(
             duthost)[pc["name"]]["status"] == "Dw")
 
+        enable_macsec_port(duthost, ctrl_port, profile_name)
+        sleep(30)
         # Add ethernet interface <ctrl_port> back to PortChannel interface <pc>
-        duthost.command("sudo config portchannel member add {} {}".format(
-            pc["name"], ctrl_port))
+        duthost.command("sudo config portchannel {} member add {} {}".format(getns_prefix(duthost, ctrl_port), pc["name"], ctrl_port))
         assert wait_until(20, 1, 0, lambda: find_portchannel_from_member(
             ctrl_port, get_portchannel(duthost))["status"] == "Up")
 
@@ -424,17 +444,19 @@ class TestInteropProtocol():
             assert wait_until(1, 1, LLDP_TIMEOUT,
                             lambda: nbr["name"] in get_lldp_list(duthost))
 
-    def test_bgp(self, duthost, ctrl_links, upstream_links, profile_name):
+    def test_bgp(self, duthost, ctrl_links, upstream_links, profile_name, tbinfo):
         '''Verify BGP neighbourship
         '''
+        if tbinfo["topo"]["type"] == "t2":
+            pytest.skip("SKIP test_bgp for T2 topology for now.")
+
         bgp_config = duthost.get_running_config_facts()[
             "BGP_NEIGHBOR"].values()[0]
         BGP_KEEPALIVE = int(bgp_config["keepalive"])
         BGP_HOLDTIME = int(bgp_config["holdtime"])
 
-        def check_bgp_established(up_link):
-            command = "sonic-db-cli STATE_DB HGETALL 'NEIGH_STATE_TABLE|{}'".format(
-                up_link["local_ipv4_addr"])
+        def check_bgp_established(ctrl_port, up_link):
+            command = "sonic-db-cli {} STATE_DB HGETALL 'NEIGH_STATE_TABLE|{}'".format(getns_prefix(duthost, ctrl_port), up_link["local_ipv4_addr"])
             fact = sonic_db_cli(duthost, command)
             logger.info("bgp state {}".format(fact))
             return fact["state"] == "Established"
@@ -442,7 +464,7 @@ class TestInteropProtocol():
         # Ensure the BGP sessions have been established
         for ctrl_port in ctrl_links.keys():
             assert wait_until(30, 5, 0,
-                              check_bgp_established, upstream_links[ctrl_port])
+                              check_bgp_established, ctrl_port, upstream_links[ctrl_port])
 
         # Check the BGP sessions are present after port macsec disabled
         for ctrl_port, nbr in ctrl_links.items():
@@ -453,7 +475,7 @@ class TestInteropProtocol():
                         not nbr["host"].iface_macsec_ok(nbr["port"]))
             # BGP session should keep established even after holdtime
             assert wait_until(BGP_HOLDTIME * 2, BGP_KEEPALIVE, BGP_HOLDTIME,
-                              check_bgp_established, upstream_links[ctrl_port])
+                              check_bgp_established, ctrl_port, upstream_links[ctrl_port])
 
         # Check the BGP sessions are present after port macsec enabled
         for ctrl_port, nbr in ctrl_links.items():
@@ -467,7 +489,7 @@ class TestInteropProtocol():
                 ctrl_port, get_portchannel(duthost))["status"] == "Up")
             # BGP session should keep established even after holdtime
             assert wait_until(BGP_HOLDTIME * 2, BGP_KEEPALIVE, BGP_HOLDTIME,
-                              check_bgp_established, upstream_links[ctrl_port])
+                              check_bgp_established, ctrl_port, upstream_links[ctrl_port])
 
     def test_snmp(self, duthost, ctrl_links, upstream_links, creds):
         '''
