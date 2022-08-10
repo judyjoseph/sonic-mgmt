@@ -30,7 +30,8 @@ __all__ = [
     'get_macsec_sa_name',
     'get_macsec_counters',
     'get_sci',
-    'getns_prefix'
+    'getns_prefix',
+    'get_ipnetns_prefix'
 ]
 
 
@@ -67,6 +68,15 @@ def getns_prefix(host, intf):
         asic = host.get_port_asic_instance(intf)
         ns = host.get_namespace_from_asic_id(asic.asic_index)
         ns_prefix = "-n {}".format(ns)
+
+    return ns_prefix
+
+def get_ipnetns_prefix(host, intf):
+    ns_prefix = " "
+    if host.is_multi_asic:
+        asic = host.get_port_asic_instance(intf)
+        ns = host.get_namespace_from_asic_id(asic.asic_index)
+        ns_prefix = "sudo ip netns exec {}".format(ns)
 
     return ns_prefix
 

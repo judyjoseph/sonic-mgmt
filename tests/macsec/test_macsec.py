@@ -82,11 +82,7 @@ class TestControlPlane():
         _, _, _, last_dut_egress_sa_table, last_dut_ingress_sa_table = get_appl_db(
             duthost, port_name, nbr["host"], nbr["port"])
         up_link = upstream_links[port_name]
-        asic = duthost.get_port_asic_instance(port_name)
-        ns = duthost.get_namespace_from_asic_id(asic.asic_index)
-        if duthost.is_multi_asic:
-            NS_PREFIX = "sudo ip netns exec {}".format(ns)
-        output = duthost.command("{} ping {} -w {} -q -i 0.1".format(NS_PREFIX, up_link["local_ipv4_addr"], rekey_period * 2))["stdout_lines"]
+        output = duthost.command("{} ping {} -w {} -q -i 0.1".format(get_ipnetns_prefix(duthost, port_name), up_link["local_ipv4_addr"], rekey_period * 2))["stdout_lines"]
         _, _, _, new_dut_egress_sa_table, new_dut_ingress_sa_table = get_appl_db(
             duthost, port_name, nbr["host"], nbr["port"])
         assert last_dut_egress_sa_table != new_dut_egress_sa_table
@@ -153,12 +149,8 @@ class TestDataPlane():
 
     def test_dut_to_neighbor(self, duthost, ctrl_links, upstream_links):
         for up_port, up_link in upstream_links.items():
-            asic = duthost.get_port_asic_instance(up_port)
-            ns = duthost.get_namespace_from_asic_id(asic.asic_index)
-            if duthost.is_multi_asic:
-                NS_PREFIX = "sudo ip netns exec {}".format(ns)
             ret = duthost.command(
-                "{} ping -c {} {}".format(NS_PREFIX, 4, up_link['local_ipv4_addr']))
+                "{} ping -c {} {}".format(get_ipnetns_prefix(duthost, up_port), 4, up_link['local_ipv4_addr']))
             assert not ret['failed']
 
     def test_neighbor_to_neighbor(self, duthost, ctrl_links, upstream_links, nbr_device_numbers):
@@ -241,12 +233,8 @@ class TestDataPlane():
             ingress_start_counters += Counter(get_macsec_counters(asic, ns, ingress_sa_name))
 
         # Launch traffic
-        asic = duthost.get_port_asic_instance(port_name)
-        ns = duthost.get_namespace_from_asic_id(asic.asic_index)
-        if duthost.is_multi_asic:
-            NS_PREFIX = "sudo ip netns exec {}".format(ns)
         ret = duthost.command(
-            "{} ping -c {} -s {} {}".format(NS_PREFIX, PKT_NUM, PKT_OCTET, nbr_ip_addr))
+            "{} ping -c {} -s {} {}".format(get_ipnetns_prefix(duthost, port_name), PKT_NUM, PKT_OCTET, nbr_ip_addr))
         assert not ret['failed']
         sleep(10) # wait 10s for polling counters
 
