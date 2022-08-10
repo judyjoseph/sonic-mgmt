@@ -201,9 +201,6 @@ class TestDataPlane():
                     requester["peer_ipv4_addr"]), module_ignore_errors=True)
 
     def test_counters(self, duthost, ctrl_links, upstream_links, rekey_period, tbinfo):
-        if tbinfo["topo"]["type"] == "t2":
-            pytest.skip("SKIP test_counters for T2 topo")
-
         if rekey_period:
             pytest.skip("Counter increase is not guaranteed in case rekey is happening")
         EGRESS_SA_COUNTERS = (
@@ -234,13 +231,14 @@ class TestDataPlane():
             assert up_port in ctrl_links
 
             asic = duthost.get_port_asic_instance(up_port)
+            ns = duthost.get_namespace_from_asic_id(asic.asic_index)
             egress_sa_name = get_macsec_sa_name(asic, up_port, True)
             ingress_sa_name = get_macsec_sa_name(asic, up_port, False)
             if not egress_sa_name or not ingress_sa_name:
                 continue
 
-            egress_start_counters += Counter(get_macsec_counters(asic, egress_sa_name))
-            ingress_start_counters += Counter(get_macsec_counters(asic, ingress_sa_name))
+            egress_start_counters += Counter(get_macsec_counters(asic, ns, egress_sa_name))
+            ingress_start_counters += Counter(get_macsec_counters(asic, ns, ingress_sa_name))
 
         # Launch traffic
         asic = duthost.get_port_asic_instance(port_name)
@@ -257,13 +255,14 @@ class TestDataPlane():
         ingress_end_counters = Counter()
         for up_port in up_ports:
             asic = duthost.get_port_asic_instance(up_port)
+            ns = duthost.get_namespace_from_asic_id(asic.asic_index)
             egress_sa_name = get_macsec_sa_name(asic, up_port, True)
             ingress_sa_name = get_macsec_sa_name(asic, up_port, False)
             if not egress_sa_name or not ingress_sa_name:
                 continue
 
-            egress_end_counters += Counter(get_macsec_counters(asic, egress_sa_name))
-            ingress_end_counters += Counter(get_macsec_counters(asic, ingress_sa_name))
+            egress_end_counters += Counter(get_macsec_counters(asic, ns, egress_sa_name))
+            ingress_end_counters += Counter(get_macsec_counters(asic, ns, ingress_sa_name))
 
         i = 'SAI_MACSEC_SA_ATTR_CURRENT_XPN'
         assert egress_end_counters[i] - egress_start_counters[i] >= PKT_NUM
@@ -448,7 +447,7 @@ class TestInteropProtocol():
         '''Verify BGP neighbourship
         '''
         if tbinfo["topo"]["type"] == "t2":
-            pytest.skip("SKIP test_bgp for T2 topology for now.")
+            pytest.skip("SKIP test_bgp for T2 topology.")
 
         bgp_config = duthost.get_running_config_facts()[
             "BGP_NEIGHBOR"].values()[0]

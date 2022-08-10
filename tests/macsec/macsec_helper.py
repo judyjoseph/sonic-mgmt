@@ -378,10 +378,11 @@ def macsec_dp_poll(test, device_number=0, port_number=None, timeout=None, exp_pk
     return test.dataplane.PollFailure(exp_pkt, recent_packets,packet_count)
 
 
-def get_macsec_counters(sonic_asic, name):
+def get_macsec_counters(sonic_asic, namespace, name):
     lines = [
-        'from swsscommon.swsscommon import DBConnector, CounterTable, MacsecCounter',
-        'counterTable = CounterTable(DBConnector("COUNTERS_DB", 0))',
+        'from swsscommon.swsscommon import DBConnector, CounterTable, MacsecCounter,SonicDBConfig',
+        'SonicDBConfig.initializeGlobalConfig()',
+        'counterTable = CounterTable(DBConnector("COUNTERS_DB", 0, False, "{}"))'.format(namespace),
         '_, values = counterTable.get(MacsecCounter(), "{}")'.format(name),
         'print(dict(values))'
         ]

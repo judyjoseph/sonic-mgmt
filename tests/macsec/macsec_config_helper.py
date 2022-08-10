@@ -80,7 +80,7 @@ def enable_macsec_port(host, port, profile_name):
     pc = find_portchannel_from_member(port, get_portchannel(host))
     if pc:
         host.command("sudo config portchannel {} member del {} {}".format(getns_prefix(host, port), pc["name"], port))
-        
+
     cmd = "sonic-db-cli {} CONFIG_DB HSET 'PORT|{}' 'macsec' '{}'".format(getns_prefix(host, port), port, profile_name)
     host.command(cmd)
 
