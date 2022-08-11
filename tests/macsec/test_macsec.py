@@ -223,7 +223,7 @@ class TestDataPlane():
             assert up_port in ctrl_links
 
             asic = duthost.get_port_asic_instance(up_port)
-            ns = duthost.get_namespace_from_asic_id(asic.asic_index)
+            ns = duthost.get_namespace_from_asic_id(asic.asic_index) if duthost.is_multi_asic else ''
             egress_sa_name = get_macsec_sa_name(asic, up_port, True)
             ingress_sa_name = get_macsec_sa_name(asic, up_port, False)
             if not egress_sa_name or not ingress_sa_name:
@@ -243,7 +243,7 @@ class TestDataPlane():
         ingress_end_counters = Counter()
         for up_port in up_ports:
             asic = duthost.get_port_asic_instance(up_port)
-            ns = duthost.get_namespace_from_asic_id(asic.asic_index)
+            ns = duthost.get_namespace_from_asic_id(asic.asic_index) if duthost.is_multi_asic else ''
             egress_sa_name = get_macsec_sa_name(asic, up_port, True)
             ingress_sa_name = get_macsec_sa_name(asic, up_port, False)
             if not egress_sa_name or not ingress_sa_name:
