@@ -391,13 +391,14 @@ def macsec_dp_poll(test, device_number=0, port_number=None, timeout=None, exp_pk
 def get_macsec_counters(sonic_asic, namespace, name):
     lines = [
         'from swsscommon.swsscommon import DBConnector, CounterTable, MacsecCounter,SonicDBConfig',
-        'SonicDBConfig.initializeGlobalConfig()',
+        'from sonic_py_common import multi_asic',
+        'SonicDBConfig.initializeGlobalConfig() if multi_asic.is_multi_asic() else {}',
         'counterTable = CounterTable(DBConnector("COUNTERS_DB", 0, False, "{}"))'.format(namespace),
         '_, values = counterTable.get(MacsecCounter(), "{}")'.format(name),
         'print(dict(values))'
         ]
     cmd = "python -c '{}'".format(';'.join(lines))
-    output = sonic_asic.command(cmd)["stdout_lines"][0]
+    output = sonic_asic.sonichost.command(cmd)["stdout_lines"][0]
     return {k:int(v) for k,v in ast.literal_eval(output).items()}
 
 
