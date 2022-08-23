@@ -66,8 +66,15 @@ def delete_macsec_profile(host, port, profile_name):
             parents=['mac security'])
         return
 
-    cmd = "sonic-db-cli {} CONFIG_DB DEL 'MACSEC_PROFILE|{}'".format(getns_prefix(host, port), profile_name)
-    host.command(cmd)
+    #if port is None, the macsec profile is deleted from all namespaces if multi-asic
+    if port is None:
+        for ns in host.get_asic_namespace_list():
+            CMD_PREFIX = "-n {}".format(ns) if ns is not None else " "
+            cmd = "sonic-db-cli {} CONFIG_DB DEL 'MACSEC_PROFILE|{}'".format(CMD_PREFIX, profile_name)
+            host.command(cmd)
+    else:
+        cmd = "sonic-db-cli {} CONFIG_DB DEL 'MACSEC_PROFILE|{}'".format(getns_prefix(host, port), profile_name)
+        host.command(cmd)
 
 
 def enable_macsec_port(host, port, profile_name):
@@ -140,11 +147,11 @@ def cleanup_macsec_configuration(duthost, ctrl_links, profile_name):
     for dut_port, nbr in ctrl_links.items():
         disable_macsec_port(duthost, dut_port)
         disable_macsec_port(nbr["host"], nbr["port"])
-        delete_macsec_profile(nbr["host"], nbr["port"], profile_name)
         devices.add(nbr["host"])
 
-    # Delete the macsec profile once after it is removed from all interfaces.
-    delete_macsec_profile(duthost, dut_port, profile_name)
+    # Delete the macsec profile once after it is removed from all interfaces. if we pass port as None, 
+    # the profile is removed from the DB in all namespaces.
+    delete_macsec_profile(duthost, None, profile_name)
 
     # Waiting for all mka session were cleared in all devices
     for d in devices:
