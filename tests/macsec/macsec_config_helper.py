@@ -67,7 +67,7 @@ def delete_macsec_profile(host, port, profile_name):
         return
 
     #if port is None, the macsec profile is deleted from all namespaces if multi-asic
-    if port is None:
+    if host.is_multi_asic and port is None:
         for ns in host.get_asic_namespace_list():
             CMD_PREFIX = "-n {}".format(ns) if ns is not None else " "
             cmd = "sonic-db-cli {} CONFIG_DB DEL 'MACSEC_PROFILE|{}'".format(CMD_PREFIX, profile_name)
