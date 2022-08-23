@@ -153,6 +153,10 @@ def cleanup_macsec_configuration(duthost, ctrl_links, profile_name):
     # the profile is removed from the DB in all namespaces.
     delete_macsec_profile(duthost, None, profile_name)
 
+    # Delete the macsec profile in neighbors
+    for d in devices:
+       delete_macsec_profile(d, None, profile_name) 
+
     # Waiting for all mka session were cleared in all devices
     for d in devices:
         if isinstance(d, EosHost):
