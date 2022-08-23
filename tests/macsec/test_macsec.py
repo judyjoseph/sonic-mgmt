@@ -390,14 +390,12 @@ class TestInteropProtocol():
         assert pc["status"] == "Up"
 
         disable_macsec_port(duthost, ctrl_port)
-        sleep(30)
         # Remove ethernet interface <ctrl_port> from PortChannel interface <pc>
         duthost.command("sudo config portchannel {} member del {} {}".format(getns_prefix(duthost, ctrl_port), pc["name"], ctrl_port))
         assert wait_until(20, 1, 0, lambda: get_portchannel(
             duthost)[pc["name"]]["status"] == "Dw")
 
         enable_macsec_port(duthost, ctrl_port, profile_name)
-        sleep(30)
         # Add ethernet interface <ctrl_port> back to PortChannel interface <pc>
         duthost.command("sudo config portchannel {} member add {} {}".format(getns_prefix(duthost, ctrl_port), pc["name"], ctrl_port))
         assert wait_until(20, 1, 0, lambda: find_portchannel_from_member(
