@@ -355,6 +355,11 @@ class TestFaultHandling():
         disable_macsec_port(duthost, port_name)
         disable_macsec_port(nbr["host"], nbr["port"])
         delete_macsec_profile(nbr["host"], nbr["port"], profile_name)
+ 
+        # Wait till macsec session has gone down.
+        wait_until(20, 3, 0,
+            lambda: not duthost.iface_macsec_ok(port_name) and
+                    not nbr["host"].iface_macsec_ok(nbr["port"]))
 
         # Set a wrong cak to the profile
         primary_cak = "0" * len(primary_cak)
