@@ -93,10 +93,7 @@ class TestControlPlane():
 class TestDataPlane():
     BATCH_COUNT = 10
 
-    def test_server_to_neighbor(self, duthost, ctrl_links, downstream_links, upstream_links, ptfadapter, tbinfo):
-        if tbinfo["topo"]["type"] == "t2":
-            pytest.skip("SKIP test_server_to_neighbor as there are no downstream neighbors.")
-
+    def test_server_to_neighbor(self, duthost, ctrl_links, downstream_links, upstream_links, ptfadapter):
         ptfadapter.dataplane.set_qlen(TestDataPlane.BATCH_COUNT * 10)
 
         down_link = downstream_links.values()[0]
@@ -192,7 +189,7 @@ class TestDataPlane():
                 requester["host"].shell("ip route del 0.0.0.0/0 via {}".format(
                     requester["peer_ipv4_addr"]), module_ignore_errors=True)
 
-    def test_counters(self, duthost, ctrl_links, upstream_links, rekey_period, tbinfo):
+    def test_counters(self, duthost, ctrl_links, upstream_links, rekey_period):
         if rekey_period:
             pytest.skip("Counter increase is not guaranteed in case rekey is happening")
         EGRESS_SA_COUNTERS = (
@@ -434,12 +431,9 @@ class TestInteropProtocol():
             assert wait_until(1, 1, LLDP_TIMEOUT,
                             lambda: nbr["name"] in get_lldp_list(duthost))
 
-    def test_bgp(self, duthost, ctrl_links, upstream_links, profile_name, tbinfo):
+    def test_bgp(self, duthost, ctrl_links, upstream_links, profile_name):
         '''Verify BGP neighbourship
         '''
-        if tbinfo["topo"]["type"] == "t2":
-            pytest.skip("SKIP test_bgp for T2 topology.")
-
         bgp_config = duthost.get_running_config_facts()[
             "BGP_NEIGHBOR"].values()[0]
         BGP_KEEPALIVE = int(bgp_config["keepalive"])
