@@ -87,14 +87,15 @@ def enable_macsec_port(host, port, profile_name):
     pc = find_portchannel_from_member(port, get_portchannel(host))
     if pc:
         host.command("sudo config portchannel {} member del {} {}".format(getns_prefix(host, port), pc["name"], port))
-        time.sleep(5)
 
     cmd = "sonic-db-cli {} CONFIG_DB HSET 'PORT|{}' 'macsec' '{}'".format(getns_prefix(host, port), port, profile_name)
     host.command(cmd)
 
     if pc:
         host.command("sudo config portchannel {} member add {} {}".format(getns_prefix(host, port), pc["name"], port))
-        time.sleep(5)
+    
+    # wait after macsec enable 
+    time.sleep(2)
         
 def disable_macsec_port(host, port):
     if isinstance(host, EosHost):
@@ -106,14 +107,15 @@ def disable_macsec_port(host, port):
     pc = find_portchannel_from_member(port, get_portchannel(host))
     if pc:
         host.command("sudo config portchannel {} member del {} {}".format(getns_prefix(host, port), pc["name"], port))
-        time.sleep(5)
         
     cmd = "sonic-db-cli {} CONFIG_DB HDEL 'PORT|{}' 'macsec'".format(getns_prefix(host, port), port)
     host.command(cmd)
 
     if pc:
         host.command("sudo config portchannel {} member add {} {}".format(getns_prefix(host, port), pc["name"], port))
-        time.sleep(5)
+
+    # wait after macsec disable 
+    time.sleep(2)
 
 def enable_macsec_feature(duthost, macsec_nbrhosts):
     nbrhosts = macsec_nbrhosts
