@@ -71,6 +71,7 @@ from tests.common.plugins.ptfadapter.dummy_testutils import DummyTestUtils
 
 try:
     from tests.common.macsec import MacsecPluginT2, MacsecPluginT0
+    import tests.common.macsec.macsec_helper
 except ImportError as e:
     logging.error(e)
 
